@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>أبو يوسف – بيتزا إيطالي وفطير شرقي</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@500;700;900&family=Lalezar&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#14110d;--card:#1f1a13;--line:#3a2f1c;--gold:#f5b82e;--red:#c8202b;--text:#f6ecd9;--mute:#b9a98a;color-scheme:dark;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+*{box-sizing:border-box;margin:0}
+html{scroll-padding-top:70px;scroll-behavior:smooth}
+body{background:var(--bg) radial-gradient(circle,#2a2113 1.5px,transparent 1.5px) 0 0/26px 26px;color:var(--text);font-family:Cairo,Tahoma,sans-serif;line-height:1.6;padding-bottom:90px}
+header{text-align:center;padding:30px 12px 10px;background:radial-gradient(ellipse at 50% 60%,#4a3312,transparent 70%)}
+h1{font-family:Lalezar,Cairo,sans-serif;font-weight:400;font-size:clamp(64px,19vw,110px);color:var(--gold);line-height:1;text-shadow:3px 4px 0 var(--red)}
+.sub{font-weight:700;font-size:18px;margin-top:8px}
+.slogan{display:inline-block;margin-top:12px;background:var(--gold);color:#1a1205;font-weight:900;padding:3px 22px;border-radius:4px;transform:rotate(-1.5deg)}
+#pz{width:min(86vw,400px);height:auto;display:block;margin:18px auto 0;overflow:visible;touch-action:manipulation}
+.spin{transform-origin:200px 200px;animation:sp 60s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+.sl{cursor:pointer;transition:transform .45s cubic-bezier(.3,1.6,.5,1)}
+.sl.out{transform:translate(var(--dx),var(--dy))}
+.sl .st{opacity:0;transition:opacity .3s}
+.sl.out .st{opacity:1}
+.hint{color:var(--mute);font-size:15px;margin-top:6px}
+.cta{display:flex;gap:10px;justify-content:center;margin-top:16px;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:11px 20px;border-radius:8px;font-weight:700;text-decoration:none;font-size:16px;border:2px solid var(--gold);color:var(--gold);background:none;font-family:inherit;cursor:pointer}
+.btn.main{background:var(--gold);color:#1a1205}
+.btn.wa{background:#1fa855;border-color:#1fa855;color:#fff}
+.mq{direction:ltr;overflow:hidden;background:var(--red);margin-top:26px;transform:rotate(-1deg) scale(1.03);white-space:nowrap}
+.mq div{display:inline-block;padding:6px 0;font-weight:900;animation:mq 25s linear infinite}
+@keyframes mq{to{transform:translateX(-50%)}}
+nav{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--line);display:flex;gap:8px;overflow-x:auto;padding:10px 12px;padding-top:calc(10px + env(safe-area-inset-top,0px));justify-content:center}
+nav a{white-space:nowrap;color:var(--text);text-decoration:none;font-weight:700;padding:6px 16px;border-radius:20px;border:1px solid var(--line)}
+nav a:hover,nav a:focus-visible{background:var(--gold);color:#1a1205;outline:none}
+main{max-width:760px;margin:0 auto;padding:8px 14px}
+section{margin-top:34px}
+.hd{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.hd svg{width:60px;height:60px;flex:none}
+h2{font-family:Lalezar,Cairo,sans-serif;font-weight:400;font-size:34px;background:var(--red);padding:0 22px;border-radius:4px;transform:rotate(-1deg)}
+.note{color:var(--mute);font-size:14px;margin-bottom:10px}
+.tw{overflow-x:auto;border:1px solid var(--line);border-radius:10px;background:var(--card)}
+table{width:100%;border-collapse:collapse;min-width:340px}
+th{background:var(--gold);color:#1a1205;padding:8px 6px;font-size:15px}
+th:first-child,td:first-child{text-align:right;padding-right:14px}
+td{padding:6px 4px;text-align:center;border-top:1px solid var(--line)}
+td:first-child{font-weight:500}
+td button{font:700 16px Cairo,sans-serif;color:var(--gold);background:#2a2216;border:1px solid var(--line);border-radius:8px;min-width:52px;padding:4px 8px;cursor:pointer}
+td button:hover,td button:focus-visible{background:var(--gold);color:#1a1205}
+td button.pop{transform:scale(1.25)}
+.extra{background:var(--card);border:2px dashed var(--gold);border-radius:12px;padding:18px;text-align:center}
+.extra b{font-size:30px;color:var(--gold);display:block}
+.chips{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-top:12px}.chips button{font:700 16px Cairo,sans-serif;color:var(--text);background:#2a2216;border:1px solid var(--gold);border-radius:22px;padding:8px 18px;cursor:pointer}.chips button:hover,.chips button:focus-visible{background:var(--gold);color:#1a1205}.chips button.pop{transform:scale(1.15)}
+#bar{position:fixed;inset-inline:10px;bottom:calc(10px + env(safe-area-inset-bottom,0px));max-width:560px;margin:auto;background:var(--gold);color:#1a1205;border-radius:14px;box-shadow:0 6px 24px #000a;z-index:9;display:none}
+#bar.on{display:block}
+#bh{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;font-weight:900;cursor:pointer}
+#bl{display:none;background:var(--card);color:var(--text);padding:10px 14px;max-height:40vh;overflow:auto}
+#bar.open #bl{display:block}
+#bl div{display:flex;justify-content:space-between;gap:8px;padding:5px 0;border-bottom:1px solid var(--line)}
+#bl input{accent-color:#f5b82e;margin-inline-end:8px}
+#bl input[type=text],#bl input[type=tel]{width:100%;margin:4px 0;padding:10px;border-radius:8px;border:1px solid var(--line);background:#14110d;color:var(--text);font:inherit}
+#bl button{background:none;border:0;color:var(--red);font-size:18px;cursor:pointer}
+#bl a{display:block;text-align:center;margin-top:10px}
+footer{text-align:center;padding:30px 16px 20px;border-top:1px solid var(--line);color:var(--mute);margin-top:40px}
+footer .t{color:var(--text);font-weight:700;font-size:18px;margin-bottom:12px}
+.ph{direction:ltr;unicode-bidi:embed}
+@media (prefers-reduced-motion:reduce){.spin,.mq div{animation:none}.sl{transition:none}}
+:root{--bg:#0e0c09;--card:#17130e;--line:#2e2619;--gold:#d4a24c;--red:#a3202a}
+body{background:var(--bg)}
+header{padding:38px 16px 22px;background:radial-gradient(ellipse 80% 55% at 50% 45%,#2e2210,transparent)}
+h1{font-size:clamp(54px,15vw,92px);text-shadow:none;background:linear-gradient(180deg,#f6dc9a,#c8923a);-webkit-background-clip:text;background-clip:text;color:transparent;padding:4px 0}
+.sub{font-weight:600;color:var(--mute);font-size:16px;letter-spacing:.5px}
+.slogan{background:none;color:var(--gold);border:1px solid var(--gold);border-radius:30px;transform:none;padding:3px 24px;font-weight:700}
+#pz{filter:drop-shadow(0 22px 30px #000c)}
+.hint{font-size:14px}
+.btn{border-radius:30px;padding:12px 26px;border:1px solid var(--gold);transition:.2s}
+.btn.main{background:linear-gradient(135deg,#f3d58c,#c8923a);border-color:transparent;color:#1a1205;box-shadow:0 6px 18px #c8923a40}
+.btn.wa{background:#1d9a50;border-color:#1d9a50}
+.mq{transform:none;background:none;border-block:1px solid var(--line);color:var(--gold);margin-top:22px}
+.mq div{font-weight:600;font-size:14px;letter-spacing:1px;padding:9px 0}
+.feat{display:flex;gap:10px;flex-wrap:wrap;max-width:760px;margin:24px auto 6px;padding:0 14px}
+.feat div{flex:1 1 150px;text-align:center;padding:14px 10px;border:1px solid var(--line);border-radius:14px;background:var(--card);font-weight:700;font-size:15px}
+.feat span{display:block;font-size:26px}
+nav{background:#0e0c09ee;backdrop-filter:blur(10px)}
+nav a{border:0;color:var(--mute);font-size:15px;padding:6px 14px}
+nav a:hover,nav a:focus-visible{background:#2a2114;color:var(--gold)}
+.hd{border-bottom:1px solid var(--line);padding-bottom:12px;margin-bottom:16px}
+.hd svg{width:48px;height:48px;filter:drop-shadow(0 4px 8px #0008)}
+h2{background:none;transform:none;padding:0;font-family:Cairo,sans-serif;font-weight:900;font-size:28px;color:var(--text)}
+h2::after{content:"";display:block;width:44px;height:3px;background:var(--gold);margin-top:2px;border-radius:2px}
+.tw,.extra{border:1px solid var(--line);border-radius:16px;background:var(--card);box-shadow:0 10px 30px #0006}
+.extra{padding:22px}
+th{background:#241c10;color:var(--gold);border-bottom:1px solid var(--gold);padding:11px 6px;font-size:14px}
+td{border-top:1px solid #231c11}
+tr:nth-child(even) td{background:#1a150f}
+tr:hover td{background:#221a0f}
+td button{background:transparent;border:1px solid #4a3a1e;color:var(--gold);border-radius:20px;min-width:56px;transition:.15s}
+td button:hover,td button:focus-visible{background:var(--gold);color:#1a1205;border-color:var(--gold)}
+.chips button{border-color:#4a3a1e}
+#bar{background:linear-gradient(135deg,#f3d58c,#c8923a);border-radius:18px;box-shadow:0 10px 36px #000c}
+footer{background:#0a0806;margin-top:50px;padding:36px 16px 28px}
+</style>
+</head>
+<body>
+<header>
+<h1>أبو يوسف</h1>
+<div class="sub">بيتزا إيطالي • فطير شرقي • بيتزا شرقي</div>
+<div class="slogan">الطعم اللي على أصوله</div>
+<svg id="pz" viewBox="-40 -40 480 480" role="img" aria-label="بيتزا تفاعلية"></svg>
+<p class="hint">اضغط على أي شريحة وشوف الجبنة 🧀</p>
+<div class="cta">
+<a class="btn main" href="tel:01061795628">📞 اتصل واطلب</a>
+<a class="btn wa" href="https://wa.me/201110868231">واتساب</a>
+</div>
+</header>
+<div class="mq"><div id="mq"></div></div>
+<div class="feat"><div><span>🛵</span>ديلفري لحد بيتك</div><div><span>⭐</span>مذاق مميز بجودة عالية</div><div><span>🎁</span>توصيل مجاني فوق 500 جنيه</div></div>
+<nav>
+<a href="#it">البيتزا الإيطالي</a><a href="#fa">الفطير الشرقي</a><a href="#ea">البيتزا الشرقي</a><a href="#ex">الإضافات</a><a href="#dlv">التوصيل</a>
+</nav>
+<main>
+<p class="note" style="margin-top:18px">اضغط على السعر عشان تضيف للطلب، وبعدين ابعته واتساب.</p>
+<section id="it"><div class="hd"><span data-ic="p"></span><h2>البيتزا الإيطالي</h2></div><div class="tw" id="t-it"></div></section>
+<section id="fa"><div class="hd"><span data-ic="f"></span><h2>الفطير الشرقي</h2></div><div class="tw" id="t-fa"></div></section>
+<section id="ea"><div class="hd"><span data-ic="e"></span><h2>البيتزا الشرقي</h2></div><div class="tw" id="t-ea"></div></section>
+<section id="ex"><div class="hd"><span data-ic="c"></span><h2>الإضافات</h2></div>
+<div class="extra"><p>إضافة وش بيتزا للفطير (موتزاريلا + طماطم + زيتون + فلفل)</p><b>25 جنيه</b>
+<button class="btn" style="margin-top:12px" data-p="25" data-n="إضافة وش بيتزا للفطير" data-s="">+ أضف للطلب</button>
+<p class="note" style="margin-top:18px">أو اختار إضافة واحدة:</p>
+<div class="chips"><button data-p="10" data-n="إضافة موتزاريلا" data-s="">🧀 موتزاريلا +10</button><button data-p="5" data-n="إضافة طماطم" data-s="">🍅 طماطم +5</button><button data-p="10" data-n="إضافة زيتون" data-s="">🫒 زيتون +10</button><button data-p="5" data-n="إضافة فلفل" data-s="">🫑 فلفل +5</button></div></div></section>
+<section id="dlv"><div class="hd"><span style="font-size:48px;line-height:1">🛵</span><h2>التوصيل</h2></div><div class="extra"><p style="font-size:18px;font-weight:700">داخل البلد: <span style="color:var(--gold)">15 جنيه</span></p><p style="font-size:18px;font-weight:700">خارج البلد: <span style="color:var(--gold)">30 جنيه</span></p><p style="margin-top:10px;font-weight:900;color:#1fa855">🎁 التوصيل مجاني لأي طلب 500 جنيه أو أكتر</p></div></section>
+</main>
+<footer>
+<div class="t">للتواصل والطلب</div>
+<div class="cta">
+<a class="btn" href="tel:01061795628"><span class="ph">01061795628</span> (مكالمات)</a>
+<a class="btn wa" href="https://wa.me/201110868231"><span class="ph">01110868231</span> (واتساب)</a>
+</div>
+<p style="margin-top:18px">أكل طيب .. دايماً معاك</p>
+</footer>
+<div id="bar"><div id="bh"><span id="bc"></span><span id="bt"></span></div>
+<div id="bl"><div id="bi" style="display:block"></div><div id="dl" style="display:block;border:0;padding-top:10px"><label style="display:block;padding:4px 0;cursor:pointer"><input type="radio" name="dv" value="0" checked>🏪 هاجي أستلم من المحل</label><label style="display:block;padding:4px 0;cursor:pointer"><input type="radio" name="dv" value="15">🛵 ديلفري داخل البلد (15 جنيه)</label><label style="display:block;padding:4px 0;cursor:pointer"><input type="radio" name="dv" value="30">🛵 ديلفري خارج البلد (30 جنيه)</label></div><div id="dn" class="note" style="display:block;border:0"></div><div id="fm" style="display:block;border:0"><input id="cn" type="text" placeholder="اسمك"><input id="cp" type="tel" inputmode="tel" placeholder="رقم موبايلك"><input id="ca" type="text" placeholder="العنوان بالتفصيل (للديلفري)" style="display:none"><div id="nf" style="display:block;border:0;padding:8px 0 0"><p class="note" style="margin:0 0 4px">ملاحظات على الأكل:</p><label style="display:block;padding:4px 0;cursor:pointer"><input type="checkbox" value="من غير زيتون">🫒 من غير زيتون</label><label style="display:block;padding:4px 0;cursor:pointer"><input type="checkbox" value="من غير فلفل">🫑 من غير فلفل</label><label style="display:block;padding:4px 0;cursor:pointer"><input type="checkbox" value="من غير طماطم">🍅 من غير طماطم</label><input id="cx" type="text" placeholder="ملاحظات تانية (اختياري)"></div></div><a class="btn wa" id="bw" target="_blank" rel="noopener">ابعت الطلب واتساب</a></div></div>
+<script>
+var s=7;function r(){s=s*16807%2147483647;return s/2147483647}
+var C=200,P=Math.PI/180;
+function pt(R,a){return(C+R*Math.cos(a)).toFixed(1)+" "+(C+R*Math.sin(a)).toFixed(1)}
+function wd(R,a,b){return"M200 200L"+pt(R,a)+"A"+R+" "+R+" 0 0 1 "+pt(R,b)+"Z"}
+function topping(t,x,y,rot){
+ if(t==0)return'<g transform="translate('+x+' '+y+')"><circle r="15" fill="#b3261e"/><circle cx="-5" cy="-4" r="3" fill="#7d1510"/><circle cx="5" cy="4" r="3" fill="#7d1510"/></g>';
+ if(t==1)return'<g transform="translate('+x+' '+y+')"><circle r="8" fill="#222"/><circle r="3.5" fill="#f4c04f"/></g>';
+ if(t==2)return'<g transform="translate('+x+' '+y+')"><circle r="11" fill="#d8362a"/><circle r="6" fill="#ee6a4f"/></g>';
+ return'<ellipse rx="13" ry="6" fill="#3f8f3a" transform="translate('+x+' '+y+') rotate('+rot+')"/>'}
+var pz='<g class="spin">';
+for(var i=0;i<8;i++){
+ var a=(i*45-90)*P,b=((i+1)*45-90)*P,m=(a+b)/2,dx=(Math.cos(m)*34).toFixed(1),dy=(Math.sin(m)*34).toFixed(1);
+ var g='<g class="sl" style="--dx:'+dx+'px;--dy:'+dy+'px"><path d="'+wd(192,a,b)+'" fill="#c9822f"/><path d="'+wd(172,a,b)+'" fill="#f4c04f" stroke="#d99a2b" stroke-width="1.5"/>';
+ for(var k=0;k<5;k++){
+  var an=a+(0.2+0.6*r())*45*P,rr=(k<2?60:95)+r()*65,x=(C+rr*Math.cos(an)).toFixed(1),y=(C+rr*Math.sin(an)).toFixed(1);
+  g+=topping((i+k)%4,x,y,Math.floor(r()*180))}
+ g+='<path class="st" d="M200 200L'+(200-dx)+' '+(200-dy)+'" stroke="#fbe28a" stroke-width="6" stroke-linecap="round" fill="none"/></g>';
+ pz+=g}
+document.getElementById("pz").innerHTML=pz+'</g>';
+document.getElementById("pz").addEventListener("click",function(e){var g=e.target.closest(".sl");if(g)g.classList.toggle("out")});
+var w="طعم على أصوله ✦ بيتزا إيطالي ✦ فطير شرقي ✦ جبنة بتتمط ✦ أبو يوسف ✦ ";
+document.getElementById("mq").innerHTML=w.repeat(6)+w.repeat(6);
+function mini(x){return'<svg viewBox="0 0 64 64"><circle cx="32" cy="32" r="30" fill="#c9822f"/><circle cx="32" cy="32" r="25" fill="#f4c04f"/><circle cx="22" cy="24" r="6" fill="#b3261e"/><circle cx="40" cy="22" r="5" fill="#b3261e"/><circle cx="34" cy="40" r="6" fill="#b3261e"/><circle cx="20" cy="40" r="3" fill="#222"/><ellipse cx="44" cy="38" rx="6" ry="3" fill="#3f8f3a"/>'+(x||"")+'</svg>'}
+var IC={p:mini('<path d="M32 32L32 2" stroke="#14110d" stroke-width="2"/>'),e:mini('<circle cx="30" cy="30" r="3" fill="#222"/>'),
+f:'<svg viewBox="0 0 64 64"><rect x="6" y="10" width="52" height="13" rx="6.5" fill="#e0a040"/><rect x="6" y="25" width="52" height="13" rx="6.5" fill="#c98a2b"/><rect x="6" y="40" width="52" height="13" rx="6.5" fill="#e0a040"/><path d="M14 31h36" stroke="#b3261e" stroke-width="4" stroke-dasharray="4 3"/></svg>',
+c:'<svg viewBox="0 0 64 64"><path d="M8 40h48l-6 16H14z" fill="#e8dcc0"/><path d="M12 40l8-14 10 10 8-16 14 20z" fill="#f4c04f"/><circle cx="48" cy="22" r="8" fill="#d8362a"/></svg>'};
+document.querySelectorAll("[data-ic]").forEach(function(e){e.innerHTML=IC[e.dataset.ic]});
+var H=["الصنف","صغير","وسط","كبير"],SZ=["صغير","وسط","كبير"];
+var D={
+it:[["مارجريتا",70,90,100],["ميكس جبن",85,100,110],["استربس",80,100,120],["بانيه",70,90,110],["تشيكن باربكيو",80,100,120],["تشيكن رانش",80,100,120],["شيش",80,100,120],["فاهيتا",80,100,120],["ميكس فراخ",80,100,120],["سجق بلدي",80,100,120],["بيبروني",80,100,120],["سلامي",80,100,120],["بسطرمة",80,100,120],["مكس اللحوم",80,100,120]],
+fa:[["سجق كيري",100,120,140],["سجق إسكندراني",90,110,130],["بسطرمة كيري",120,140,160],["مكس اللحوم",100,120,140],["لحم بلدي كيري",120,140,160],["مكس جبن",100,120,140],["تشيكن رانش",100,120,140],["تشيكن باربكيو",100,120,140],["مكس فراخ",100,120,140],["لحم بلدي مفروم",100,120,140]],
+ea:[["سجق بلدي",60,80,100],["لحمة",60,80,100],["لحم بلدي مفروم",80,100,120],["فراخ",80,100,120],["توتة",80,100,120]]};
+var KN={it:"بيتزا إيطالي",fa:"فطير",ea:"بيتزا شرقي"};
+Object.keys(D).forEach(function(k){
+ var h="<table><thead><tr>"+H.map(function(x){return"<th>"+x+"</th>"}).join("")+"</tr></thead><tbody>";
+ D[k].forEach(function(r){h+="<tr><td>"+r[0]+"</td>";for(var j=1;j<4;j++)h+='<td><button data-p="'+r[j]+'" data-n="'+KN[k]+' '+r[0]+'" data-s="'+SZ[j-1]+'">'+r[j]+"</button></td>";h+="</tr>"});
+ document.getElementById("t-"+k).innerHTML=h+"</tbody></table>"});
+var cart=[],bar=document.getElementById("bar");
+document.getElementById("dl").addEventListener("change",function(){document.getElementById("ca").style.display=document.querySelector('input[name=dv]:checked').value=="0"?"none":"block";draw()});
+document.getElementById("fm").addEventListener("input",function(){draw()});
+document.addEventListener("click",function(e){
+ var b=e.target.closest("[data-p]");
+ if(b){cart.push({n:b.dataset.n,s:b.dataset.s,p:+b.dataset.p});b.classList.add("pop");setTimeout(function(){b.classList.remove("pop")},250);draw()}
+ var x=e.target.closest("[data-x]");if(x){cart.splice(+x.dataset.x,1);draw()}
+ if(e.target.closest("#bh"))bar.classList.toggle("open")});
+function draw(){
+ var sub=cart.reduce(function(a,c){return a+c.p},0),dv=+(document.querySelector('input[name=dv]:checked')||{value:0}).value,fee=sub>=500?0:dv,t=sub+fee,dnm=dv==15?"توصيل داخل البلد":dv==30?"توصيل خارج البلد":"استلام من المحل",DL=dnm+(dv?(fee?" – "+fee+" جنيه":" (مجاني)"):"");
+ bar.classList.toggle("on",cart.length>0);
+ document.getElementById("bc").textContent="🛒 طلبك ("+cart.length+")";
+ document.getElementById("bt").textContent=t+" جنيه";
+ document.getElementById("dn").textContent=sub>=500?"🎉 التوصيل مجاني لطلبك":"التوصيل مجاني لو الطلب 500 جنيه أو أكتر (باقي "+(500-sub)+" جنيه)";
+ document.getElementById("bi").innerHTML=cart.map(function(c,i){return"<div><span>"+c.n+(c.s?" – "+c.s:"")+(c.p?" ("+c.p+")":"")+"</span><button data-x="+i+" aria-label='حذف'>✕</button></div>"}).join("");
+ var gv=function(i){return document.getElementById(i).value.trim()},nt=[].slice.call(document.querySelectorAll("#nf input:checked")).map(function(x){return x.value}).concat(gv("cx")?[gv("cx")]:[]),m=(dv?"🛵 طلب ديلفري":"🏪 استلام من المحل")+"\nأهلاً أبو يوسف، عايز أطلب:\n"+cart.map(function(c){return"• "+c.n+(c.s?" ("+c.s+")":"")+(c.p?" – "+c.p+" جنيه":"")}).join("\n")+"\n"+DL+"\nالإجمالي: "+t+" جنيه"+(gv("cn")?"\nالاسم: "+gv("cn"):"")+(gv("cp")?"\nالموبايل: "+gv("cp"):"")+(dv&&gv("ca")?"\nالعنوان: "+gv("ca"):"")+(nt.length?"\nملاحظات: "+nt.join("، "):"");
+ document.getElementById("bw").href="https://wa.me/201110868231?text="+encodeURIComponent(m)}
+</script>
+</body>
+</html>

@@ -468,6 +468,52 @@ def git_commit_push(repo, job_path, message):
     return ok, (p.stdout + p.stderr).strip()
 
 
+def git_commit_job_removal(repo, job_path):
+    try:
+        rel = Path(job_path).resolve().relative_to(Path(repo).resolve()).as_posix()
+    except Exception:
+        return False, "job file is outside the repo"
+    rm = git_run(repo, "rm", "-q", "--ignore-unmatch", "--", rel)
+    if rm.returncode != 0:
+        return False, (rm.stdout + rm.stderr).strip()
+    Path(job_path).parent.mkdir(parents=True, exist_ok=True)
+    c = git_run(
+        repo, "-c", "user.name=witanime-bot", "-c", "user.email=witanime-bot@local",
+        "commit", "-m", f"job done: remove {Path(rel).name}",
+    )
+    c_out = (c.stdout + c.stderr).strip()
+    if c.returncode != 0 and "nothing to commit" not in c_out:
+        return False, c_out
+    if "nothing to commit" in c_out:
+        return True, "already committed"
+    p = git_run(repo, "push")
+    if p.returncode != 0:
+        git_run(repo, "pull", "--rebase", "--autostash", timeout=300)
+        p = git_run(repo, "push", timeout=300)
+    p_out = (p.stdout + p.stderr).strip()
+    if p.returncode != 0:
+        return False, p_out.splitlines()[-1] if p_out else "push failed"
+    return True, "pushed"
+
+
+def remove_done_job(repo, job_path, name):
+    try:
+        job_path.unlink(missing_ok=True)
+        log(f"[watcher] {name}: job file removed from jobs/")
+    except Exception as e:
+        log(f"[watcher] {name}: could not remove job file: {e}")
+        return
+    if repo and (Path(repo) / ".git").is_dir():
+        try:
+            ok, out = git_commit_job_removal(repo, job_path)
+        except Exception as e:
+            ok, out = False, str(e)
+        if ok:
+            log(f"[watcher] {name}: job file removal committed to git")
+        else:
+            log(f"[watcher] {name}: job file removal not pushed ({out}) - remove it manually on GitHub")
+
+
 def extract_zip_flat(zip_path, dest_dir, ep_num=None):
     out_files = []
     with zipfile.ZipFile(zip_path) as z:
@@ -486,8 +532,10 @@ def extract_zip_flat(zip_path, dest_dir, ep_num=None):
                 while target.exists():
                     target = dest_dir / f"{stem}{tag} ({n}){ext}"
                     n += 1
-            with z.open(info) as src, open(target, "wb") as dst:
+            part = dest_dir / (target.name + ".part")
+            with z.open(info) as src, open(part, "wb") as dst:
                 shutil.copyfileobj(src, dst, 1 << 20)
+            os.replace(part, target)
             out_files.append(target)
     if not any(f.suffix.lower() in VIDEO_EXTS for f in out_files):
         raise RuntimeError("zip contains no video file")
@@ -520,6 +568,28 @@ def is_html_file(path, n=512):
         return False
 
 
+def zip_matches_job(zip_path, episodes, expected=0):
+    try:
+        with zipfile.ZipFile(zip_path) as z:
+            infos = z.infolist()
+    except Exception:
+        return False
+    if len(infos) < len(episodes):
+        return False
+    if expected and sum(i.file_size for i in infos) < expected * 0.95:
+        return False
+    return True
+
+
+def check_disk_space(path, needed, label):
+    free = shutil.disk_usage(path).free
+    if free < needed:
+        raise RuntimeError(
+            f"insufficient disk space for {label}: free {human(free)}, need ~{human(needed)} "
+            f"(free up space or use a codespace with a bigger disk)"
+        )
+
+
 def job_fname(rec, ep):
     url = rec.get("url") or ""
     return sanitize(
@@ -527,7 +597,7 @@ def job_fname(rec, ep):
     )
 
 
-def write_summary(path, job, total, extracted, missing, zip_path):
+def write_summary(path, job, total, extracted, missing, zip_path, note=None):
     try:
         lines = [
             f"Anime: {job.get('anime') or job.get('slug')}",
@@ -537,15 +607,17 @@ def write_summary(path, job, total, extracted, missing, zip_path):
             f"Episodes extracted: {len(extracted)}",
             f"Missing episodes: {', '.join(str(e) for e in sorted(missing)) or 'none'}",
             f"Final zip: {zip_path or 'none'}",
-            f"Finished: {now_iso()}",
         ]
+        if note:
+            lines.append(f"Note: {note}")
+        lines.append(f"Finished: {now_iso()}")
         Path(path).write_text("\n".join(lines) + "\n", encoding="utf-8")
     except Exception:
         pass
 
 
 def process_job(job_path, repo, work_root, args, finalize_allowed=False):
-    """Download + extract + zip + publish one job. Safe to re-run (skips existing)."""
+    """Download -> extract flat into one folder -> single zip -> move to output. Safe to re-run."""
     job_path = Path(job_path)
     job = load_job(job_path)
     slug = job.get("slug") or job_path.stem.split("__")[0]
@@ -558,7 +630,41 @@ def process_job(job_path, repo, work_root, args, finalize_allowed=False):
     ws = Path(work_root) / slug
     zips_dir = ws / "zips"
     zips_dir.mkdir(parents=True, exist_ok=True)
+    if getattr(args, "out", None):
+        outdir = Path(args.out).expanduser()
+    elif repo:
+        outdir = Path(repo) / "witanime" / "output"
+    else:
+        outdir = ws / "output"
+    outdir.mkdir(parents=True, exist_ok=True)
+    final_zip = outdir / f"{title}.zip"
+    tmp_zip = outdir / f"{title}.zip.tmp"
+    tmp_zip.unlink(missing_ok=True)
     client = WitAnime(proxy=args.proxy)
+
+    total = len(episodes)
+    expected = sum(rec.get("size") or 0 for rec in episodes)
+    if zip_matches_job(final_zip, episodes, expected):
+        log(f"[job] {title}: output zip already exists and matches this job, skipping download")
+        write_summary(
+            outdir / f"{title}.txt", job, total,
+            [rec.get("episode") for rec in episodes], [], final_zip,
+            note="final zip already existed; reused without re-downloading",
+        )
+        shutil.rmtree(ws, ignore_errors=True)
+        return {
+            "finalized": True,
+            "status": "ok",
+            "missing": [],
+            "anime": title,
+            "zip": str(final_zip),
+            "total": total,
+            "extracted": total,
+        }
+
+    if expected:
+        max_ep = max((rec.get("size") or 0 for rec in episodes), default=0)
+        check_disk_space(ws, int(expected * 1.05) + max_ep + (512 << 20), f"{title} downloads")
 
     missing = []
     done_count = 0
@@ -607,7 +713,6 @@ def process_job(job_path, repo, work_root, args, finalize_allowed=False):
                 dest.unlink()
             missing.append(ep)
 
-    total = len(episodes)
     log(f"[job] {title}: downloaded {done_count}/{total}" + (f"  missing: {missing}" if missing else ""))
     if missing and not finalize_allowed:
         return {"finalized": False, "missing": missing, "anime": title}
@@ -634,24 +739,17 @@ def process_job(job_path, repo, work_root, args, finalize_allowed=False):
             if ep not in missing:
                 missing.append(ep)
 
-    if getattr(args, "out", None):
-        outdir = Path(args.out).expanduser()
-    elif repo:
-        outdir = Path(repo) / "witanime" / "output"
-    else:
-        outdir = ws / "output"
-    outdir.mkdir(parents=True, exist_ok=True)
-
     zip_published = None
     if extracted:
-        final_zip = ws / f"{title}.zip"
-        log(f"[job] {title}: building {title}.zip ({len(extracted)} episode(s)) ...")
-        build_final_zip(folder, final_zip)
-        log(f"[job] {title}: zip built ({human(final_zip.stat().st_size)})")
-        zip_published = outdir / f"{title}.zip"
-        if zip_published != final_zip:
-            shutil.copyfile(final_zip, zip_published)
+        folder_bytes = sum(p.stat().st_size for p in folder.rglob("*") if p.is_file())
+        check_disk_space(outdir, int(folder_bytes * 1.05) + (512 << 20), f"{title}.zip in output")
+        log(f"[job] {title}: all episodes extracted, building {title}.zip ({len(extracted)} episode(s)) ...")
+        build_final_zip(folder, tmp_zip)
+        log(f"[job] {title}: zip built ({human(tmp_zip.stat().st_size)}), moving to output ...")
+        os.replace(tmp_zip, final_zip)
+        zip_published = final_zip
         status = "partial" if missing else "ok"
+        log(f"[job] {title}: published {final_zip.name}")
     else:
         status = "failed"
         log(f"[job] {title}: no episodes available, nothing to zip")
@@ -710,6 +808,9 @@ def watch_mode(args):
             for job_path in sorted(jobs_dir.glob("*.json")):
                 name = job_path.name
                 if name in state.get("done", {}):
+                    if job_path.exists():
+                        log(f"[watcher] {name}: already done earlier, removing re-added job file")
+                        remove_done_job(repo, job_path, name)
                     continue
                 rinfo = state.get("retry", {}).get(name)
                 if rinfo and time.time() < rinfo.get("next", 0):
@@ -723,7 +824,7 @@ def watch_mode(args):
                     raise
                 except Exception as e:
                     log(f"[watcher] {name} crashed: {e}")
-                    res = {"finalized": False, "missing": ["?"], "anime": name}
+                    res = {"finalized": False, "missing": [], "anime": name, "error": str(e)}
 
                 if res.get("finalized"):
                     state.setdefault("done", {})[name] = {
@@ -734,22 +835,23 @@ def watch_mode(args):
                     }
                     state.get("retry", {}).pop(name, None)
                     log(f"[watcher] {name} DONE: status={res.get('status')} zip={res.get('zip')}")
-                    try:
-                        job_path.unlink()
-                        log(f"[watcher] {name}: job file removed from jobs/")
-                    except Exception as e:
-                        log(f"[watcher] {name}: could not remove job file: {e}")
+                    remove_done_job(repo, job_path, name)
                 else:
                     delay = WATCH_RETRY_DELAYS[min(rounds, len(WATCH_RETRY_DELAYS) - 1)]
+                    err = res.get("error")
                     state.setdefault("retry", {})[name] = {
                         "round": rounds + 1,
                         "next": time.time() + delay,
                         "missing": res.get("missing", []),
+                        "error": err,
                     }
-                    log(
-                        f"[watcher] {name}: {len(res.get('missing', []))} episode(s) missing, "
-                        f"retry in {delay // 60} min"
-                    )
+                    if err:
+                        log(f"[watcher] {name}: {err}  (retrying in {delay // 60} min)")
+                    else:
+                        log(
+                            f"[watcher] {name}: {len(res.get('missing', []))} episode(s) missing, "
+                            f"retry in {delay // 60} min"
+                        )
                 save_state(state_path, state)
         except KeyboardInterrupt:
             log("[watcher] stopped by user")

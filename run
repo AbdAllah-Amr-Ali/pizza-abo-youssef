@@ -1,5 +1,6 @@
 docker rm -f xfce-desktop webtop 2>/dev/null; \
 docker run -d --name=xfce-desktop --shm-size=512m -p 6901:6901 \
+  -v /workspaces/pizza-abo-youssef:/mnt/repo \
   -v desktop_downloads:/home/headless/Downloads \
   accetto/ubuntu-vnc-xfce-g3:latest && \
 docker exec -u root xfce-desktop bash -c '
@@ -15,4 +16,6 @@ apt-get update
 apt-get install -y firefox
 readlink -f /usr/bin/firefox | grep -q "^/usr/lib/firefox" && echo "=== FIREFOX OK ===" || { echo "=== WRONG FIREFOX (snap stub) ==="; exit 1; }
 zip -v | head -2 && unzip -v | head -1
-'
+' && \
+docker exec -u root xfce-desktop bash /mnt/repo/witanime/setup_codespace.sh && \
+docker exec -u root xfce-desktop bash /mnt/repo/witanime/start_bot.sh

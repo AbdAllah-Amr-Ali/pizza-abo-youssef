@@ -734,6 +734,11 @@ def watch_mode(args):
                     }
                     state.get("retry", {}).pop(name, None)
                     log(f"[watcher] {name} DONE: status={res.get('status')} zip={res.get('zip')}")
+                    try:
+                        job_path.unlink()
+                        log(f"[watcher] {name}: job file removed from jobs/")
+                    except Exception as e:
+                        log(f"[watcher] {name}: could not remove job file: {e}")
                 else:
                     delay = WATCH_RETRY_DELAYS[min(rounds, len(WATCH_RETRY_DELAYS) - 1)]
                     state.setdefault("retry", {})[name] = {

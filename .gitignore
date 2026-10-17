@@ -1,0 +1,14 @@
+# WitAnime bot
+witanime/output/*
+!witanime/output/.gitkeep
+witanime/jobs/*.tmp
+__pycache__/
+*.pyc
+
+# Downloads / archives
+*.zip
+*.mkv
+*.mp4
+*.part
+rclone.conf
+persist/

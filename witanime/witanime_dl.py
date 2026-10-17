@@ -453,7 +453,8 @@ def git_pull(repo):
     before = git_run(repo, "rev-parse", "HEAD").stdout.strip()
     r = git_run(repo, "pull", "--ff-only", "--quiet")
     after = git_run(repo, "rev-parse", "HEAD").stdout.strip()
-    return r.returncode == 0, (before != after)
+    err = (r.stderr or r.stdout or "").strip().splitlines()
+    return r.returncode == 0, (before != after), (err[-1] if err else "")
 
 
 def git_commit_push(repo, job_path, message):
@@ -508,6 +509,15 @@ def build_final_zip(folder, out_zip):
         out_zip.unlink(missing_ok=True)
         raise RuntimeError(f"zip verify failed: {len(infos)}/{len(files)} entries, {total}/{expected} bytes")
     return out_zip
+
+
+def is_html_file(path, n=512):
+    try:
+        with open(path, "rb") as f:
+            head = f.read(n).lstrip().lower()
+        return head.startswith(b"<!doctype") or head.startswith(b"<html")
+    except Exception:
+        return False
 
 
 def job_fname(rec, ep):
@@ -567,13 +577,28 @@ def process_job(job_path, repo, work_root, args, finalize_allowed=False):
                 continue
             log(f"[job] {title}: episode {ep} size mismatch, re-downloading")
             dest.unlink()
+        page = rec.get("page") or BASE
         try:
             log(f"[job] {title}: downloading episode {ep} -> {fname}")
-            written = client.download(url, rec.get("page") or BASE, str(dest), retries=args.retries)
-            if exp and written != exp:
-                raise RuntimeError(f"size mismatch (got {written}, expected {exp})")
+            err = None
+            try:
+                written = client.download(url, page, str(dest), retries=args.retries)
+            except Exception as e:
+                err = e
+                written = 0
+            if err or not written or is_html_file(dest) or (exp and written != exp):
+                log(f"[job] {title}: episode {ep}: stored link failed, re-resolving fresh link ...")
+                if dest.exists():
+                    dest.unlink()
+                direct, _fresh_name, fresh_size = client.mediafire_direct(page)
+                if not exp:
+                    exp = fresh_size
+                written = client.download(direct, page, str(dest), retries=args.retries)
+                if not written or is_html_file(dest) or (exp and written != exp):
+                    raise RuntimeError(f"size mismatch after refresh (got {written}, expected {exp})")
             done_count += 1
             log(f"[job] {title}: episode {ep} downloaded ({human(written)})")
+            time.sleep(args.delay)
         except KeyboardInterrupt:
             raise
         except Exception as ex:
@@ -656,7 +681,17 @@ def watch_mode(args):
     state_path = work / "watcher_state.json"
     state = load_state(state_path)
     jobs_dir = Path(repo) / "witanime" / "jobs"
-    jobs_dir.mkdir(parents=True, exist_ok=True)
+    try:
+        jobs_dir.mkdir(parents=True, exist_ok=True)
+        probe = jobs_dir / ".write_test"
+        probe.touch()
+        probe.unlink()
+    except Exception as e:
+        raise SystemExit(
+            f"[watcher] cannot write to {jobs_dir} ({e}).\n"
+            "    Start the watcher as root, e.g.:\n"
+            f"    docker exec -u root <container> bash {Path(__file__).resolve().parent}/start_bot.sh"
+        )
 
     log(f"[watcher] started  repo={repo}  work={work}  interval={int(args.interval)}s")
     log(f"[watcher] watching {jobs_dir}")
@@ -664,9 +699,11 @@ def watch_mode(args):
     while True:
         try:
             try:
-                ok, changed = git_pull(repo)
+                ok, changed, pull_err = git_pull(repo)
                 if changed:
                     log("[watcher] repo updated (git pull)")
+                elif not ok and pull_err:
+                    log(f"[watcher] git pull failed: {pull_err}")
             except Exception as e:
                 log(f"[watcher] git pull failed: {e}")
 

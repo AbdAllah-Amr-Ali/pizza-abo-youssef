@@ -3,6 +3,11 @@
 # Usage (inside the container):  bash /mnt/repo/witanime/start_bot.sh
 set -euo pipefail
 
+if [ "$(id -u)" -ne 0 ]; then
+    echo "[!] WARNING: not running as root - writes to the repo mount may fail."
+    echo "    Recommended: docker exec -u root <container> bash $0"
+fi
+
 REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 WORK_DIR="${WITANIME_WORK:-$HOME/witanime_work}"
 LOG="$WORK_DIR/watcher.log"

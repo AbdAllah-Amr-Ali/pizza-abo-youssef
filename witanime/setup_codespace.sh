@@ -12,10 +12,19 @@ if [ ! -d "$REPO_DIR/witanime" ]; then
     exit 1
 fi
 
+if [ "$(id -u)" -eq 0 ]; then
+    SUDO=""
+elif command -v sudo >/dev/null 2>&1; then
+    SUDO="sudo"
+else
+    echo "[!] Not root and sudo is not available - cannot install packages."
+    exit 1
+fi
+
 echo "==> Installing system packages (python3-pip, unzip, zip, git)"
 export DEBIAN_FRONTEND=noninteractive
-sudo apt-get update -y
-sudo apt-get install -y python3-pip unzip zip git
+$SUDO apt-get update -y
+$SUDO apt-get install -y python3-pip unzip zip git
 
 echo "==> Installing curl_cffi"
 pip3 install --break-system-packages curl_cffi || pip3 install curl_cffi

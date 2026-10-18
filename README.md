@@ -158,7 +158,32 @@ python witanime_dl.py --from-file job.json --process            # full pipeline 
 - downloads go to `<file>.part` and are renamed on completion; stale `*.zip.tmp` from a crashed run is cleaned at job start
 - the watcher state lives in `~/witanime_work/watcher_state.json` (`done` / `retry` maps); deleting it simply lets the watcher re-process any jobs still on disk
 - work directory is wiped per job (`~/witanime_work/<slug>/`) — only the final zip is kept
-- job removal is committed by the watcher as `witanime-bot` and pushed with `--rebase --autostash` retry; if the push fails, remove the file on GitHub manually
+- the watcher pulls with `git pull --rebase --autostash`, so local job-removal commits that couldn't be pushed are replayed on top of new commits automatically (no more "Not possible to fast-forward" deadlock)
+- job removal is committed by the watcher as `witanime-bot` and pushed with a `--rebase --autostash` retry; if the push still fails, remove the file on GitHub manually
+
+### Git credentials inside the container
+
+The watcher runs in the `xfce-desktop` container, whose git does **not** inherit the codespace's
+GitHub login. Pass the codespace token when starting it so removals can be pushed:
+
+```bash
+docker exec -u root -e GITHUB_TOKEN="$GITHUB_TOKEN" xfce-desktop bash /mnt/repo/witanime/start_bot.sh
+```
+
+`start_bot.sh` installs a `credential.https://github.com.helper` that reads `$GITHUB_TOKEN` at push time
+and warns loudly if the token is missing (downloads still work, only pushes fail).
+
+### Running on a fork (another account)
+
+If the codespace lives on a fork, the watcher's pushes (job removals) go to the **fork**, while the
+original repo keeps its copy of the job files. To get updates into the fork/codespace:
+
+```bash
+cd /workspaces/pizza-abo-youssef
+git remote add upstream https://github.com/<original-owner>/pizza-abo-youssef.git   # once
+git pull --rebase --autostash upstream main
+git push
+```
 
 ## Troubleshooting
 
@@ -166,6 +191,8 @@ python witanime_dl.py --from-file job.json --process            # full pipeline 
 | --- | --- |
 | `Cloudflare is challenging this IP` on the PC | normal network/VPN issue — use a residential connection or `--proxy`, or pass a browser `--cookie "cf_clearance=..."` + `--user-agent` |
 | watcher says `cannot write to .../jobs` | run it as root: `docker exec -u root xfce-desktop bash .../start_bot.sh` |
+| `could not read Username for 'https://github.com'` when removing a job | the watcher was started without `GITHUB_TOKEN` — restart it with `docker exec -u root -e GITHUB_TOKEN="$GITHUB_TOKEN" xfce-desktop bash .../start_bot.sh` |
+| `git pull failed: Not possible to fast-forward` | local unpushed job-removal commits diverged from origin. Fix credentials as above (new code rebases automatically); one-time recovery on the codespace host: `cd /workspaces/pizza-abo-youssef && git pull --rebase --autostash && git push` |
 | `insufficient disk space ...` | free space in the codespace (delete old `witanime_work` dirs / outputs) or use a bigger machine |
 | Codespaces says *out of monthly free usage* | Free plan = 120 core-hours/month (2-core = 60 h, 4-core = 30 h). Stop the codespace when idle; avoid leaving `stay up` running |
 | job stuck in `retry` | check `~/witanime_work/watcher.log` — it logs the exact error per attempt |
